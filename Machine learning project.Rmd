@@ -94,4 +94,13 @@ mytesting <- training[-inTrain, ]
 ```
 
 
+---
+
+**Taking a look to the data**
+
+The variable `classe` contains 5 levels: `A`,`B`,`C`,`D` and `E`.`A` plot of the outcome variable will allow us to see the frequency of each levels in the subTraining data set and compare one another.
+
+```{r, message=FALSE,warning=FALSE}
+plot(mytraining$classe, col="lightgreen", main = "Plot of levels of variable classe within the TrainTrainingSet data set", xlab="classe", ylab="Frequency" )
+```
 

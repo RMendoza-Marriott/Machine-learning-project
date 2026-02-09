@@ -173,6 +173,27 @@ rfModel <- randomForest(as.factor(classe)~., data=training)
 rfModel
 ```
 
+```{r, message=FALSE,warning=FALSE}
+# Plot the variable importance
+varImpPlot(rfModel)
+```
+
+
+```{r, message=FALSE,warning=FALSE}
+# Confusion matrix with testing
+predTesting <- predict(rfModel, testing)
+rfcfm  <- confusionMatrix(as.factor(testing$classe), predTesting)
+rfcfm
+```
+
+
+
+
+
+
+
+
+
 
 
 

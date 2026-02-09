@@ -136,7 +136,7 @@ Two methods will be applied to model, and the best one will be used for the(test
 The methods are: `Decision Tree` and `Random Forests`.
 
 
-**Training the model with Decision Trees**
+**Model 1: Training the model with Decision Trees**
 
 ```{r, message=FALSE,warning=FALSE}
 set.seed(40000)
@@ -144,4 +144,35 @@ fitDT <- rpart(classe ~ .,training, method="class")
 # Normal plot
 rpart.plot(fitDT)
 ```
+
+```{r, message=FALSE,warning=FALSE}
+#Use model to predict classe in validation testing set
+predictionDT <- predict(fitDT, testing, type = "class")
+```
+
+
+```{r, message=FALSE,warning=FALSE}
+#Estimate the errors of the prediction algorithm in the Decision Tree model
+cmdt <-confusionMatrix(as.factor(testing$classe), predictionDT)
+cmdt
+```
+
+
+```{r, message=FALSE,warning=FALSE}
+# Accuracy plot
+plot(cmdt$table, col = cmdt$byClass, 
+main = paste("Decision Tree Confusion Matrix: Accuracy =", round(cmdt$overall['Accuracy'], 4)))
+```
+
+
+**Model 2: Training the model using Random Forest**
+
+```{r, message=FALSE,warning=FALSE}
+rfModel <- randomForest(as.factor(classe)~., data=training)
+# Summary of the model
+rfModel
+```
+
+
+
 

@@ -3,8 +3,8 @@ title: "Prediction Assignment Writeup - Module 8: Practical Machine Learning"
 author: "Roddy Mendoza Marriott"
 date: "2026-02-09"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -27,7 +27,6 @@ Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible t
 
 -The data for this project come from this source: [http://groupware.les.inf.puc-rio.br/har]. If you use the document you create for this class for any purpose please cite them as they have been very generous in allowing their data to be used for this kind of assignment.
 
----
 
 ---
 
@@ -39,19 +38,13 @@ Your submission should consist of a link to a Github repo with your R markdown a
 
 ---
 
----
-
 **Reproduceability**
 An overall pseudo-random number generator seed was set at 1234 for all code. In order to reproduce the results below, the same seed should be used. Different packages were downloaded and installed, such as caret and randomForest. These should also be installed in order to reproduce the results below (please see code below for ways and syntax to do so).
 
 ---
 
----
-
 **Cross-validation**
 Cross-validation will be performed by subsampling our training data set randomly without replacement into 2 subsamples: subTraining data (75% of the original Training data set) and subTesting data (25%). Our models will be fitted on the subTraining data set, and tested on the subTesting data. Once the most accurate model is choosen, it will be tested on the original Testing data set.
-
----
 
 ---
 
@@ -63,14 +56,41 @@ Our outcome variable “classe” is an unordered factor variable. Thus, we can 
 
 ---
 
----
-
 **Data processing**
 
 First, loading the packages and libraries.
 
 ```{r, message=FALSE,warning=FALSE}
 library(caret); library(randomForest); library(rpart); library(RColorBrewer); library(rattle)
+```
+
+---
+
+**Getting and cleaning data**
+
+```{r, message=FALSE,warning=FALSE}
+trUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+teUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+training <- read.csv(url(trUrl), na.strings=c("NA","#DIV/0!",""))
+testing <- read.csv(url(teUrl), na.strings=c("NA","#DIV/0!",""))
+training <- training[,colSums(is.na(training)) == 0]
+testing <- testing[,colSums(is.na(testing)) == 0]
+training <- training[,-c(1:7)]
+testing <- testing[,-c(1:7)]
+
+```
+
+---
+
+**Partioning the training set into two**
+
+Partioning Training data set into two data sets, 75% for `myTraining`, 25% for `myTesting`:
+
+```{r, message=FALSE,warning=FALSE}
+set.seed(1234)
+inTrain <- createDataPartition(y=training$classe, p=0.75, list=FALSE)
+mytraining <- training[inTrain, ]
+mytesting <- training[-inTrain, ]
 ```
 
 

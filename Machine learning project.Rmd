@@ -27,32 +27,12 @@ Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible t
 
 -The data for this project come from this source: [http://groupware.les.inf.puc-rio.br/har]. If you use the document you create for this class for any purpose please cite them as they have been very generous in allowing their data to be used for this kind of assignment.
 
-
 ---
 
-**What you should submit**
+**Some insights about the project**
+
 The goal of your project is to predict the manner in which they did the exercise. This is the `classe` variable in the training set. You may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases.
 
-Your submission should consist of a link to a Github repo with your R markdown and compiled HTML file describing your analysis. Please constrain the text of the writeup to < 2000 words and the number of figures to be less than 5. It will make it easier for the graders if you submit a repo with a gh-pages branch so the HTML page can be viewed online (and you always want to make it easy on graders :-). You should also apply your machine learning algorithm to the 20 test cases available in the test data above. Please submit your predictions in appropriate format to the programming assignment for automated grading. See the programming assignment for additional details.
-
-
----
-
-**Reproduceability**
-An overall pseudo-random number generator seed was set at 1234 for all code. In order to reproduce the results below, the same seed should be used. Different packages were downloaded and installed, such as caret and randomForest. These should also be installed in order to reproduce the results below (please see code below for ways and syntax to do so).
-
----
-
-**Cross-validation**
-Cross-validation will be performed by subsampling our training data set randomly without replacement into 2 subsamples: subTraining data (75% of the original Training data set) and subTesting data (25%). Our models will be fitted on the subTraining data set, and tested on the subTesting data. Once the most accurate model is choosen, it will be tested on the original Testing data set.
-
----
-
-**Expected out-of-sample error**
-Cross-validation will be performed by subsampling our training data set randomly without replacement into 2 subsamples: subTraining data (75% of the original Training data set) and subTesting data (25%). Our models will be fitted on the subTraining data set, and tested on the subTesting data. Once the most accurate model is choosen, it will be tested on the original Testing data set.
-The expected out-of-sample error will correspond to the quantity: 1-accuracy in the cross-validation data. Accuracy is the proportion of correct classified observation over the total sample in the subTesting data set. Expected accuracy is the expected accuracy in the out-of-sample data set (i.e. original testing data set). Thus, the expected value of the out-of-sample error will correspond to the expected number of missclassified observations/total observations in the Test data set, which is the quantity: 1-accuracy found from the cross-validation data set.
-
-Our outcome variable “classe” is an unordered factor variable. Thus, we can choose our error type as 1-accuracy. We have a large sample size with N= 19622 in the Training data set. This allow us to divide our Training sample into subTraining and subTesting to allow cross-validation. Features with all missing values will be discarded as well as features that are irrelevant. All other features will be kept as relevant variables. Decision tree and random forest algorithms are known for their ability of detecting the features that are important for classification 
 
 ---
 
@@ -61,7 +41,18 @@ Our outcome variable “classe” is an unordered factor variable. Thus, we can 
 First, loading the packages and libraries.
 
 ```{r, message=FALSE,warning=FALSE}
-library(caret); library(randomForest); library(rpart); library(RColorBrewer); library(rattle)
+library(plyr)
+library(dplyr)
+library(lattice)
+library(ggplot2)
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(RColorBrewer)
+library(kernlab)
+library(randomForest)
+library(knitr)
+library(e1071)
 ```
 
 ---
@@ -69,38 +60,80 @@ library(caret); library(randomForest); library(rpart); library(RColorBrewer); li
 **Getting and cleaning data**
 
 ```{r, message=FALSE,warning=FALSE}
-trUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
-teUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
-training <- read.csv(url(trUrl), na.strings=c("NA","#DIV/0!",""))
-testing <- read.csv(url(teUrl), na.strings=c("NA","#DIV/0!",""))
-training <- training[,colSums(is.na(training)) == 0]
-testing <- testing[,colSums(is.na(testing)) == 0]
-training <- training[,-c(1:7)]
-testing <- testing[,-c(1:7)]
+trainingst <- read.csv("pml-training.csv")
+testingst <- read.csv("pml-testing.csv")
 
 ```
 
----
+```{r, message=FALSE,warning=FALSE}
+dim(trainingst)
+```
 
-**Partioning the training set into two**
-
-Partioning Training data set into two data sets, 75% for `myTraining`, 25% for `myTesting`:
 
 ```{r, message=FALSE,warning=FALSE}
-set.seed(1234)
-inTrain <- createDataPartition(y=training$classe, p=0.75, list=FALSE)
-mytraining <- training[inTrain, ]
-mytesting <- training[-inTrain, ]
+dim(testingst)
 ```
 
 
 ---
 
-**Taking a look to the data**
+**Preprocessing and cleaning data**
 
-The variable `classe` contains 5 levels: `A`,`B`,`C`,`D` and `E`.`A` plot of the outcome variable will allow us to see the frequency of each levels in the subTraining data set and compare one another.
+we should Exclude the obvious columns i.e `X`, `user_name`,`raw_timestamp_part_1`,`raw_timestamp_part_2`, `cvtd_timestamp`,`roll_belt` which are the first 7 columns. We should also delete missing values and variables with near zero variance.
 
 ```{r, message=FALSE,warning=FALSE}
-plot(mytraining$classe, col="lightgreen", main = "Plot of levels of variable classe within the TrainTrainingSet data set", xlab="classe", ylab="Frequency" )
+#Deleting missing values 
+trainingst <- read.csv("pml-training.csv", na.strings=c("NA","#DIV/0!",""))  
+testingst <- read.csv("pml-testing.csv", na.strings=c("NA","#DIV/0!",""))
 ```
+
+
+
+```{r, message=FALSE,warning=FALSE}
+#Deleting missing values
+trainingst<-trainingst[,colSums(is.na(trainingst)) == 0]
+testingst <-testingst[,colSums(is.na(testingst)) == 0]
+```
+
+
+```{r, message=FALSE,warning=FALSE}
+#Removing columns that are not predictors, which are the the seven first columns
+trainingst   <-trainingst[,-c(1:7)]
+testingst <-testingst[,-c(1:7)]
+```
+
+```{r, message=FALSE,warning=FALSE}
+dim(trainingst)
+```
+
+
+```{r, message=FALSE,warning=FALSE}
+dim(testingst)
+```
+
+From the above code block sum(completeCase) == nrows confirm that the number of complete case is equal to number of rows in `trainingdf` same for `testingdf`
+
+Now we have only 53 columns(features) are left. we can preproccess the training and testing i.e converting into scales of `0` to `1` and replacing any `NA` values to average of that columns.
+
+
+---
+
+**Partition the data set into `training` and `testing` data from `trainingst`**
+
+```{r, message=FALSE,warning=FALSE}
+inTrain <- createDataPartition(y = trainingst$classe, p=0.75, list = FALSE)
+training <- trainingst[inTrain, ]
+testing <- trainingst[-inTrain, ]
+```
+
+
+---
+
+**Training the model**
+
+Two methods will be applied to model, and the best one will be used for the(testingst) predictions.
+
+The methods are: `Decision Tree` and `Random Forests`.
+
+
 

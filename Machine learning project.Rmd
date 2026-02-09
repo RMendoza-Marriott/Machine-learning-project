@@ -3,8 +3,8 @@ title: "Prediction Assignment Writeup - Module 8: Practical Machine Learning"
 author: "Roddy Mendoza Marriott"
 date: "2026-02-09"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -136,4 +136,12 @@ Two methods will be applied to model, and the best one will be used for the(test
 The methods are: `Decision Tree` and `Random Forests`.
 
 
+**Training the model with Decision Trees**
+
+```{r, message=FALSE,warning=FALSE}
+set.seed(40000)
+fitDT <- rpart(classe ~ .,training, method="class")
+# Normal plot
+rpart.plot(fitDT)
+```
 

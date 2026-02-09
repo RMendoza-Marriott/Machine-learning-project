@@ -211,6 +211,26 @@ Depending on how your model is to be used, the interpretation of the kappa stati
 
 • Very good agreement = 0.80 to 1.00
 
+This two models preforms as expected, the deviation from the cross validation accuracy is low.
+
+
+```{r, message=FALSE,warning=FALSE}
+#plot the model
+plot(rfModel)
+```
+
+The predictive accuracy of the `Random Forest Model` is excellent at 99.8 %. Accuracy has plateaued, and further tuning would only yield decimal gain.
+
+
+**Making prediction on the 20 data pointsusing random forest**
+
+`Decision Tree Model`: 73.43%, Random Forest Model: 99.53% The Random Forest model is selected and applied to make predictions on the 20 data points from the original testing dataset (testingst)
+
+```{r, message=FALSE,warning=FALSE}
+rfPredictions <- predict(rfModel, testingst,type= "class")
+rfPredictions
+```
+
 
 
 

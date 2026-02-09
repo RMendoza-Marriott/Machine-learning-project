@@ -188,11 +188,28 @@ rfcfm
 
 
 
+```{r, message=FALSE,warning=FALSE}
+plot(rfcfm$table, col = rfcfm$byClass, main = paste("Random Forest Confusion Matrix: Accuracy =", round(rfcfm$overall['Accuracy'], 4)))
+```
 
 
+**Remarks**
 
+  -`Decision Tree Model` is the worst model running, it has the low mean and the highest standard deviation.
 
+  -`Random Forest Model` it has the highest mean accuracy and lowest standard deviation.
 
+Depending on how your model is to be used, the interpretation of the kappa statistic might vary One common interpretation is shown as follows:
+
+• Poor agreement = Less than 0.20
+
+• Fair agreement = 0.20 to 0.40
+
+• Moderate agreement = 0.40 to 0.60
+
+• Good agreement = 0.60 to 0.80
+
+• Very good agreement = 0.80 to 1.00
 
 
 
